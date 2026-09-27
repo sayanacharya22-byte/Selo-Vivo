@@ -1,0 +1,38 @@
+[project]
+name = "selo-vivo-api"
+version = "1.0.0"
+description = "FastAPI control plane for Selo Vivo"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+  "alembic>=1.16,<2",
+  "fastapi>=0.118,<1",
+  "google-genai>=2,<3",
+  "httpx>=0.28,<1",
+  "orjson>=3.10,<4",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.10,<3",
+  "sqlalchemy[asyncio]>=2.0,<3",
+  "uvicorn[standard]>=0.37,<1"
+]
+
+[dependency-groups]
+dev = [
+  "aiosqlite>=0.21,<1",
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.2,<2",
+  "ruff>=0.13,<1"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/api/*.py" = ["B008"]
