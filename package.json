@@ -23,6 +23,6 @@
     "db:migrate": "uv run --directory backend alembic upgrade head"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^10.0.5"
   }
 }
