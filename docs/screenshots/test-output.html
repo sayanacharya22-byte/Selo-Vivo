@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Selo Vivo test output</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; padding: 54px; background: #13211c; color: #d8f3e2; font: 18px/1.58 Consolas, "Cascadia Mono", monospace; }
+  main { max-width: 1160px; margin: auto; overflow: hidden; border: 1px solid #3a5c4d; border-radius: 18px; background: #0c1713; box-shadow: 0 28px 80px #0008; }
+  header { padding: 16px 22px; border-bottom: 1px solid #294238; color: #93b9a7; background: #15261f; }
+  i { display: inline-block; width: 12px; height: 12px; margin-right: 9px; border-radius: 50%; background: #40a66b; }
+  pre { margin: 0; padding: 30px 34px 38px; white-space: pre-wrap; }
+  .ok { color: #78e4a3; font-weight: 700; }
+  .gold { color: #f2c94c; }
+</style>
+<main>
+  <header><i></i> selo-vivo — npm test</header>
+  <pre>&gt; selo-vivo@1.0.0 test
+&gt; npm run test:web &amp;&amp; npm run test:api &amp;&amp; npm run check:compact
+
+ RUN  v3.2.7  frontend
+
+ <span class="ok">✓</span> src/lib/wallet.test.ts (2 tests)
+ <span class="ok">✓</span> src/lib/vault.test.ts  (3 tests)
+
+ <span class="ok">Test Files  2 passed (2)</span>
+ <span class="ok">Tests       5 passed (5)</span>
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-8.4.2
+collected 9 items
+
+tests/test_api.py      <span class="ok">.......                                   [ 77%]</span>
+tests/test_privacy.py  <span class="ok">..                                        [100%]</span>
+
+<span class="ok">============================== 9 passed in 0.63s ==============================</span>
+
+&gt; selo-vivo@1.0.0 check:compact
+&gt; node scripts/validate-compact-source.mjs
+
+<span class="gold">Compact privacy boundary checks passed.</span>
+
+<span class="ok">TOTAL: 14 TESTS PASSING · 0 FAILURES</span></pre>
+</main>
+</html>
