@@ -1,0 +1,64 @@
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+// Selo Vivo: confidential sustainability credentials.
+//
+// Public: issuer root, proof count, request tag, credential class, nullifier.
+// Private: holder secret, exact expiry, exact biome group, source credential.
+
+witness private_issuer_commitment(): Bytes<32>;
+witness private_credential_class(): Uint<8>;
+witness private_expiry_epoch(): Uint<64>;
+witness private_biome_group(): Uint<8>;
+witness private_holder_secret(): Bytes<32>;
+
+export ledger issuer_root: Bytes<32>;
+export ledger verified_credentials: Counter;
+export ledger used_nullifiers: Set<Bytes<32>>;
+export ledger last_disclosed_class: Uint<8>;
+export ledger last_request_tag: Bytes<32>;
+
+// Bind trust at deployment. There is no public first-writer window in which a
+// different caller can claim the issuer root before the intended deployer.
+constructor(root: Bytes<32>) {
+  issuer_root = disclose(root);
+}
+
+export circuit prove_credential(
+  required_class: Uint<8>,
+  minimum_expiry_epoch: Uint<64>,
+  required_biome_group: Uint<8>,
+  request_tag: Bytes<32>
+): [] {
+  const credential_root = private_issuer_commitment();
+  const credential_class = private_credential_class();
+  const expiry_epoch = private_expiry_epoch();
+  const biome_group = private_biome_group();
+  const holder_secret = private_holder_secret();
+
+  assert(credential_root == issuer_root, "Credential issuer is not trusted");
+  assert(credential_class == required_class, "Credential class does not match");
+  assert(expiry_epoch >= minimum_expiry_epoch, "Credential has expired");
+  assert(
+    required_biome_group == 255 || biome_group == required_biome_group,
+    "Credential biome group is outside the requested scope"
+  );
+
+  const nullifier = persistentHash<Vector<3, Bytes<32>>>([
+    holder_secret,
+    credential_root,
+    request_tag
+  ]);
+  const public_nullifier = disclose(nullifier);
+
+  assert(!used_nullifiers.member(public_nullifier), "Credential already used for this request");
+  used_nullifiers.insert(public_nullifier);
+
+  // These two disclosures are deliberate. A verifier needs to know which
+  // public requirement was satisfied and which broad credential class passed.
+  // Exact expiry, biome evidence, holder identity, and secret stay private.
+  last_disclosed_class = disclose(required_class);
+  last_request_tag = disclose(request_tag);
+  verified_credentials.increment(1);
+}
