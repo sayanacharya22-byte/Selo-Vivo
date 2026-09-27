@@ -105,7 +105,7 @@ Compiled JavaScript bindings, ZKIR, prover keys, and verifier keys are committed
 ## Tests and CI
 
 ```bash
-npm test       # 18 tests + Compact privacy validator
+npm test       # 19 tests + Compact privacy validator
 npm run lint   # ESLint + Ruff
 npm run build  # TypeScript + Vite production bundle
 ```
@@ -142,7 +142,7 @@ scripts/                 compiler, artifact sync, source-policy checks
 - Privacy model: [`docs/PRIVACY_MODEL.md`](docs/PRIVACY_MODEL.md)
 - One-minute demo script: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)
 - CI workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-- Test command: `npm test` (18 passing)
+- Test command: `npm test` (19 passing)
 - Meaningful commits: 10+ in local history
 
 ## License

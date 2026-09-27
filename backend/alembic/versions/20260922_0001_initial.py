@@ -1,5 +1,6 @@
 """Create the privacy-safe public metadata schema."""
 
+import uuid
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -10,6 +11,30 @@ revision: str = "20260922_0001"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
+
+
+def issuer_seed_statement() -> sa.TextClause:
+    return sa.text(
+        "INSERT INTO issuers (id, name, commitment, credential_class, active, created_at) "
+        "VALUES (:id, :name, :commitment, :credential_class, true, CURRENT_TIMESTAMP)"
+    ).bindparams(
+        sa.bindparam(
+            "id",
+            value=uuid.UUID("e8fcb3db-4a9d-46aa-9e6f-343e8d5ebd41"),
+            type_=sa.Uuid(),
+        ),
+        sa.bindparam("name", value="Instituto Raiz", type_=sa.String(length=160)),
+        sa.bindparam(
+            "commitment",
+            value="7be6f4a97cb7a68458b455bb8a4d60980bbf2f21b15da50ca4f3658cb6bba3ce",
+            type_=sa.String(length=64),
+        ),
+        sa.bindparam(
+            "credential_class",
+            value="regenerative",
+            type_=sa.String(length=64),
+        ),
+    )
 
 
 def upgrade() -> None:
@@ -61,19 +86,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("key"),
     )
 
-    issuer_id = "e8fcb3db-4a9d-46aa-9e6f-343e8d5ebd41"
-    issuer_root = "7be6f4a97cb7a68458b455bb8a4d60980bbf2f21b15da50ca4f3658cb6bba3ce"
-    op.execute(
-        sa.text(
-            "INSERT INTO issuers (id, name, commitment, credential_class, active, created_at) "
-            "VALUES (:id, :name, :commitment, :credential_class, true, CURRENT_TIMESTAMP)"
-        ).bindparams(
-            id=issuer_id,
-            name="Instituto Raiz",
-            commitment=issuer_root,
-            credential_class="regenerative",
-        )
-    )
+    op.execute(issuer_seed_statement())
 
 
 def downgrade() -> None:
