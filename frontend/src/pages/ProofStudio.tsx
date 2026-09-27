@@ -51,10 +51,12 @@ export function ProofStudio() {
   const expiry = useMemo(() => credential
     ? new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric" }).format(credential.expiryEpoch * 1000)
     : null, [credential]);
-  const contractAddress = wallet.network === "preview"
-    ? import.meta.env.VITE_PREVIEW_CONTRACT_ADDRESS
-    : import.meta.env.VITE_PREPROD_CONTRACT_ADDRESS;
-  const browserDeployEnabled = import.meta.env.DEV || import.meta.env.VITE_ALLOW_BROWSER_DEPLOY === "true";
+  const contractAddress = receipt
+    && wallet.session
+    && receipt.network === wallet.network
+    && receipt.walletAddress === wallet.session.address
+    ? receipt.contractAddress
+    : null;
   const readiness = Math.min(100,
     (credential ? 35 : 0) + (wallet.session ? 25 : 0) +
     (requirement.trim().length >= 8 ? 20 : 0) + (composition ? 20 : 0),
@@ -96,6 +98,7 @@ export function ProofStudio() {
       const { proveCredential } = await import("../lib/midnight");
       const nextReceipt = await proveCredential({
         wallet: wallet.session.api,
+        walletAddress: wallet.session.address,
         network: wallet.network,
         credential,
         requirement,
@@ -145,7 +148,7 @@ export function ProofStudio() {
 
       <motion.section className="system-strip" variants={rise} aria-label="Estado operacional">
         <SystemState label="Rede" value={wallet.network} state="ok" />
-        <SystemState label="Contrato" value={contractAddress ? shortAddress(contractAddress) : browserDeployEnabled ? "deploy local habilitado" : "não configurado"} state={contractAddress || browserDeployEnabled ? "ok" : "warn"} />
+        <SystemState label="Contrato" value={contractAddress ? shortAddress(contractAddress) : wallet.session ? "será criado nesta carteira" : "conecte a 1AM"} state={contractAddress ? "ok" : wallet.session ? "pending" : "warn"} />
         <SystemState label="API pública" value={dashboardState === "ready" ? "operacional" : dashboardState === "loading" ? "verificando" : "indisponível"} state={dashboardState === "ready" ? "ok" : dashboardState === "loading" ? "pending" : "warn"} />
         <SystemState label="Estado privado" value={credential ? "somente memória" : "não carregado"} state={credential ? "ok" : "pending"} />
       </motion.section>

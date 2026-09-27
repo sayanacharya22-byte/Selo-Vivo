@@ -46,16 +46,15 @@ export type ProofReceipt = {
   proofTxId: string;
   proofTxHash: string;
   network: MidnightNetwork;
+  walletAddress: string;
 };
 
-function configuredContractAddress(network: MidnightNetwork): string | null {
-  const value = network === "preview"
-    ? import.meta.env.VITE_PREVIEW_CONTRACT_ADDRESS
-    : import.meta.env.VITE_PREPROD_CONTRACT_ADDRESS;
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-let activeDeployment: { wallet: ConnectedAPI; network: MidnightNetwork; value: FinalizedDeployment } | null = null;
+let activeDeployment: {
+  wallet: ConnectedAPI;
+  walletAddress: string;
+  network: MidnightNetwork;
+  value: FinalizedDeployment;
+} | null = null;
 
 const fetchZkAsset: typeof fetch = (input, init) => {
   const source = input instanceof Request ? input.url : input.toString();
@@ -115,6 +114,7 @@ async function sha256Bytes(value: string): Promise<Uint8Array> {
 
 async function deploy(
   wallet: ConnectedAPI,
+  walletAddress: string,
   network: MidnightNetwork,
   credential: LocalCredential,
 ): Promise<FinalizedDeployment> {
@@ -185,29 +185,6 @@ async function deploy(
     midnightProvider,
   } as unknown as MidnightProviders;
 
-  const contractAddress = configuredContractAddress(network);
-  if (contractAddress) {
-    const find = contracts.findDeployedContract as unknown as (
-      providers: MidnightProviders,
-      options: unknown,
-    ) => Promise<FinalizedDeployment>;
-    const found = await find(providers, {
-      compiledContract,
-      contractAddress,
-      privateStateId: "selo-vivo-private-state",
-      initialPrivateState,
-    });
-    activeDeployment = { wallet, network, value: found };
-    return found;
-  }
-
-  const browserDeployEnabled = import.meta.env.DEV || import.meta.env.VITE_ALLOW_BROWSER_DEPLOY === "true";
-  if (!browserDeployEnabled) {
-    throw new Error(
-      `Nenhum contrato ${network} foi configurado. Defina VITE_${network.toUpperCase()}_CONTRACT_ADDRESS.`,
-    );
-  }
-
   const submit = contracts.deployContract as unknown as (
     providers: MidnightProviders,
     options: unknown,
@@ -221,12 +198,13 @@ async function deploy(
   if (deployed.deployTxData.public.status !== "SucceedEntirely") {
     throw new Error("O contrato foi enviado, mas não finalizou por completo.");
   }
-  activeDeployment = { wallet, network, value: deployed };
+  activeDeployment = { wallet, walletAddress, network, value: deployed };
   return deployed;
 }
 
 export async function proveCredential(input: {
   wallet: ConnectedAPI;
+  walletAddress: string;
   network: MidnightNetwork;
   credential: LocalCredential;
   requirement: string;
@@ -234,9 +212,11 @@ export async function proveCredential(input: {
   minimumExpiryEpoch: number;
   requiredBiomeGroup: number;
 }): Promise<ProofReceipt> {
-  const current = activeDeployment?.wallet === input.wallet && activeDeployment.network === input.network
+  const current = activeDeployment?.wallet === input.wallet
+    && activeDeployment.walletAddress === input.walletAddress
+    && activeDeployment.network === input.network
     ? activeDeployment.value
-    : await deploy(input.wallet, input.network, input.credential);
+    : await deploy(input.wallet, input.walletAddress, input.network, input.credential);
   const requestTag = await sha256Bytes(input.requirement.trim());
   const proof = await current.callTx.prove_credential(
     BigInt(input.requiredClass),
@@ -251,6 +231,7 @@ export async function proveCredential(input: {
     proofTxId: proof.public.txId,
     proofTxHash: proof.public.txHash,
     network: input.network,
+    walletAddress: input.walletAddress,
   };
 }
 

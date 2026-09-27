@@ -36,10 +36,6 @@ The free Render plan does not provide a separate pre-deploy command, so the Blue
    | Variable | Required production value |
    |---|---|
    | `VITE_API_URL` | Exact HTTPS Render origin, with no trailing slash |
-   | `VITE_MIDNIGHT_NETWORK` | `preview` or `preprod` |
-   | `VITE_PREVIEW_CONTRACT_ADDRESS` | Reviewed Preview contract address when using Preview |
-   | `VITE_PREPROD_CONTRACT_ADDRESS` | Reviewed Preprod contract address when using Preprod |
-   | `VITE_ALLOW_BROWSER_DEPLOY` | `false` |
 
 4. Trigger a new production deploy after saving the variables. Vite embeds `VITE_*` values at build time, so changing one always requires a rebuild.
 5. Copy the final `https://...netlify.app` URL. If it differs from the value in Render's `CORS_ORIGINS`, update that Render variable and redeploy the API.
@@ -51,9 +47,15 @@ Never put `GEMINI_API_KEY`, `DATABASE_URL`, credentials, witness data, or wallet
 1. Open the Netlify URL in a fresh Chrome profile with the 1AM wallet enabled.
 2. Confirm the dashboard loads without a CORS or `Failed to fetch` error.
 3. Run the Gemini composer and confirm the response reports `provider: gemini` in the network response.
-4. Connect and disconnect 1AM, then switch between the configured Midnight networks.
-5. Submit one proof and confirm the finalized transaction appears in the interface.
+4. Connect 1AM, select Preview or Preprod, and load the local credential.
+5. Submit one proof, approve the deployment and circuit transactions in 1AM, and confirm the new per-wallet contract address and finalized proof transaction appear in the interface.
 6. Refresh `/ready` and confirm it still returns HTTP 200.
 7. Check browser developer tools: no backend secret or private witness value should appear in source, storage, requests, or logs.
 
 For a custom frontend domain, add its exact HTTPS origin to `CORS_ORIGINS` as a comma-separated value. Netlify deploy-preview origins are intentionally not wildcarded into production CORS; add a narrowly scoped preview origin only when you actively test it.
+
+## Per-wallet Midnight deployment
+
+No contract address is configured on Netlify. On the first proof in a page session, the connected 1AM wallet deploys a new constructor-bound contract on the network selected in the UI. The resulting address is tied to that wallet and network in the in-memory application session and is reused for additional proofs until the wallet, network, or page session changes. A different wallet receives a different deployment.
+
+The user therefore needs enough test DUST for both the contract deployment and proof transaction. Preview and Preprod remain explicitly selectable in the UI, and the 1AM wallet must be configured for the same network before connecting.

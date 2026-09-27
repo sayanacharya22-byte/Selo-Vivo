@@ -6,7 +6,6 @@
   NODE_VERSION = "22.20.0"
   NPM_FLAGS = "--include=dev"
   VITE_BASE_PATH = "/"
-  VITE_ALLOW_BROWSER_DEPLOY = "false"
 
 [[redirects]]
   from = "/*"

@@ -75,8 +75,6 @@ Then select `Local (http://localhost:6300)` in the wallet proving settings. The 
 - `GEMINI_API_KEY`: server-side only; never exposed to Vite.
 - `GEMINI_MODEL`: defaults to `gemini-3.8-flash`.
 - `VITE_API_URL`: public FastAPI origin.
-- `VITE_PREVIEW_CONTRACT_ADDRESS` / `VITE_PREPROD_CONTRACT_ADDRESS`: reviewed network deployments used by production clients.
-- `VITE_ALLOW_BROWSER_DEPLOY`: development/demo escape hatch; keep `false` for production.
 - `CORS_ORIGINS`: exact comma-separated Netlify and custom frontend origins; wildcards are rejected in production.
 - `ALLOWED_HOSTS`: optional comma-separated custom API domains. Render's generated hostname is trusted automatically.
 
@@ -89,7 +87,7 @@ The provisioned Neon project is `selo-vivo` in São Paulo (`aws-sa-east-1`), wit
 3. Review or edit the public buyer requirement.
 4. Optionally run **Compositor Gemini**; only public text and safe labels leave the browser.
 5. Open the disclosure review, then click **Revisar e gerar prova**.
-6. A production client attaches to the configured deployment with `findDeployedContract`, invokes `prove_credential`, and displays the finalized transaction ID. Local development may deploy only when `VITE_ALLOW_BROWSER_DEPLOY=true`.
+6. The connected wallet deploys its own constructor-bound contract on the selected network, invokes `prove_credential`, and displays both the contract address and finalized transaction ID. The deployment is reused only for that wallet and network during the current page session.
 
 Changing network or disconnecting clears the in-memory wallet session. Demo credential material is never placed in localStorage or sessionStorage and disappears with the page session. Contract maintenance keys stay in ephemeral memory and cannot be exported by the app.
 
@@ -122,7 +120,7 @@ The workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) installs 
 - API: create a Render Blueprint from [`render.yaml`](render.yaml), then add the Neon, Gemini, and exact Netlify-origin settings. The free-tier-safe start command applies Alembic migrations before Uvicorn starts; Render checks `/health`, while `/ready` verifies database reachability.
 - Container: [`backend/Dockerfile`](backend/Dockerfile) builds a pinned, non-root FastAPI image with a health check.
 - Database: run `npm run db:migrate` with the direct Neon URL. Apply migrations to a development branch before production.
-- Midnight Preprod: deploy the constructor-bound contract once, review the address, and set `VITE_PREPROD_CONTRACT_ADDRESS`; production users attach rather than redeploy.
+- Midnight: each connected 1AM wallet deploys its own constructor-bound contract on the selected Preview or Preprod network when it submits its first proof. No shared contract-address environment variable is required.
 
 Use the exact environment-variable checklist and post-deploy smoke tests in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Never place `GEMINI_API_KEY` or a Neon connection string in Netlify—the browser bundle can expose every `VITE_*` value.
 

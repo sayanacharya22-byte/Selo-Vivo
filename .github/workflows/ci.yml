@@ -67,7 +67,6 @@ jobs:
         env:
           VITE_API_URL: https://api.example.invalid
           VITE_BASE_PATH: /
-          VITE_ALLOW_BROWSER_DEPLOY: "false"
 
   backend-image:
     runs-on: ubuntu-latest
