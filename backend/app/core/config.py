@@ -1,8 +1,9 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
 
@@ -17,8 +18,13 @@ class Settings(BaseSettings):
     database_url_unpooled: str | None = None
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.8-flash"
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
-    allowed_hosts: list[str] = Field(default_factory=lambda: ["localhost", "127.0.0.1", "test"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:5173"]
+    )
+    allowed_hosts: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["localhost", "127.0.0.1", "test"]
+    )
+    render_external_hostname: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=(ROOT_DIR / ".env", Path.cwd() / ".env"),
@@ -52,6 +58,13 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() == "production"
+
+    @property
+    def effective_allowed_hosts(self) -> list[str]:
+        hosts = list(self.allowed_hosts)
+        if self.render_external_hostname and self.render_external_hostname not in hosts:
+            hosts.append(self.render_external_hostname)
+        return hosts
 
 
 @lru_cache

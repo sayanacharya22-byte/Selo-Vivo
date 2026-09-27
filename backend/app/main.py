@@ -41,7 +41,7 @@ def create_app() -> FastAPI:
         docs_url="/docs" if not settings.is_production else None,
         redoc_url=None,
     )
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.allowed_hosts)
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.effective_allowed_hosts)
     app.add_middleware(GZipMiddleware, minimum_size=800)
     app.add_middleware(
         CORSMiddleware,

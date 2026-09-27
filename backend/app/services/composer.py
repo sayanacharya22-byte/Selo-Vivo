@@ -86,6 +86,7 @@ Regras absolutas:
         interaction = client.interactions.create(
             model=settings.gemini_model,
             input=prompt,
+            store=False,
             response_format={
                 "type": "text",
                 "mime_type": "application/json",

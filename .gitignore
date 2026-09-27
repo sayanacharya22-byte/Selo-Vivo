@@ -21,4 +21,5 @@ contract/.compact-cache/
 *.log
 .chrome-profile*/
 
-.vercel
+.netlify/
+.vercel/

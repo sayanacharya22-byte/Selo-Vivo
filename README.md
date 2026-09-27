@@ -1,8 +1,8 @@
 # Selo Vivo
 
-[![Selo Vivo CI](https://github.com/AmitabhDey-byte/SeloVivo/actions/workflows/ci.yml/badge.svg)](https://github.com/AmitabhDey-byte/SeloVivo/actions/workflows/ci.yml)
+[![Selo Vivo CI](https://github.com/sayanacharya22-byte/Selo-Vivo/actions/workflows/ci.yml/badge.svg)](https://github.com/sayanacharya22-byte/Selo-Vivo/actions/workflows/ci.yml)
 
-**Deployment target:** [amitabhdey-byte.github.io/SeloVivo](https://amitabhdey-byte.github.io/SeloVivo/) after the repository workflow is pushed and enabled.
+**Hosting:** Netlify for the React application and Render for the FastAPI service. See the [deployment runbook](docs/DEPLOYMENT.md).
 
 **A confidential sustainability passport for Brazilian producer cooperatives, powered by Midnight.**
 
@@ -31,7 +31,7 @@ Small producers are often asked to send far more data than a procurement decisio
 | AI | Gemini Interactions API via `google-genai` | Privacy-minimized proof-plan composition |
 | API | FastAPI, SQLAlchemy async, Alembic | Public proof receipts, issuers, aggregate metrics |
 | Database | Neon Postgres | Public metadata only; pooled app traffic and direct migrations |
-| Delivery | GitHub Actions, Vercel, Render | Compile, test, build, and deploy |
+| Delivery | GitHub Actions, Netlify, Render | Quality gate and Git-based deployments |
 
 ## Privacy model
 
@@ -77,7 +77,8 @@ Then select `Local (http://localhost:6300)` in the wallet proving settings. The 
 - `VITE_API_URL`: public FastAPI origin.
 - `VITE_PREVIEW_CONTRACT_ADDRESS` / `VITE_PREPROD_CONTRACT_ADDRESS`: reviewed network deployments used by production clients.
 - `VITE_ALLOW_BROWSER_DEPLOY`: development/demo escape hatch; keep `false` for production.
-- `ALLOWED_HOSTS`: comma-separated FastAPI host allowlist.
+- `CORS_ORIGINS`: exact comma-separated Netlify and custom frontend origins; wildcards are rejected in production.
+- `ALLOWED_HOSTS`: optional comma-separated custom API domains. Render's generated hostname is trusted automatically.
 
 The provisioned Neon project is `selo-vivo` in São Paulo (`aws-sa-east-1`), with production branch `br-divine-forest-acrrbkka` and isolated development branch `br-solitary-union-acshvy1v`. Secrets are intentionally not committed. API traffic uses the pooled URL; Alembic uses the direct URL.
 
@@ -106,22 +107,24 @@ Compiled JavaScript bindings, ZKIR, prover keys, and verifier keys are committed
 ## Tests and CI
 
 ```bash
-npm test       # 14 tests + Compact privacy validator
+npm test       # 18 tests + Compact privacy validator
 npm run lint   # ESLint + Ruff
 npm run build  # TypeScript + Vite production bundle
 ```
 
-The workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) installs Node 22, Python dependencies, and Compact 0.31.1; audits production packages; recompiles the contract; checks generated artifacts; runs lint and all tests; builds the frontend; and builds the non-root API container. Successful pushes to `main` publish the demo bundle to GitHub Pages. A second workflow runs CodeQL for TypeScript and Python, and Dependabot tracks npm, uv, and Actions updates.
+The workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) installs Node 22, Python dependencies, and Compact 0.31.1; audits production packages; recompiles the contract; checks generated artifacts; runs lint and all tests; builds the frontend; and builds the non-root API container. Netlify builds from `main`; Render is configured to deploy only after the GitHub checks pass. A second workflow runs CodeQL for TypeScript and Python, and Dependabot tracks npm, uv, and Actions updates.
 
 ![Passing test suite and Compact validation](docs/screenshots/tests-passing.png)
 
 ## Deployment
 
-- Frontend: GitHub Actions deploys every successful `main` build to GitHub Pages. [`vercel.json`](vercel.json) adds CSP, anti-framing, permissions policy, and immutable asset caching for a custom-domain Vercel deployment.
-- API: deploy [`render.yaml`](render.yaml), then add the Neon and Gemini secrets. Render runs Alembic as a pre-deploy command and checks `/health`; `/ready` verifies database reachability.
+- Frontend: import the repository into Netlify. [`netlify.toml`](netlify.toml) pins Node, builds the npm workspace, publishes `frontend/dist`, supports SPA navigation, and applies security and cache headers.
+- API: create a Render Blueprint from [`render.yaml`](render.yaml), then add the Neon, Gemini, and exact Netlify-origin settings. The free-tier-safe start command applies Alembic migrations before Uvicorn starts; Render checks `/health`, while `/ready` verifies database reachability.
 - Container: [`backend/Dockerfile`](backend/Dockerfile) builds a pinned, non-root FastAPI image with a health check.
 - Database: run `npm run db:migrate` with the direct Neon URL. Apply migrations to a development branch before production.
 - Midnight Preprod: deploy the constructor-bound contract once, review the address, and set `VITE_PREPROD_CONTRACT_ADDRESS`; production users attach rather than redeploy.
+
+Use the exact environment-variable checklist and post-deploy smoke tests in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Never place `GEMINI_API_KEY` or a Neon connection string in Netlify—the browser bundle can expose every `VITE_*` value.
 
 ## Repository map
 
@@ -141,7 +144,7 @@ scripts/                 compiler, artifact sync, source-policy checks
 - Privacy model: [`docs/PRIVACY_MODEL.md`](docs/PRIVACY_MODEL.md)
 - One-minute demo script: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)
 - CI workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
-- Test command: `npm test` (14 passing)
+- Test command: `npm test` (18 passing)
 - Meaningful commits: 10+ in local history
 
 ## License
