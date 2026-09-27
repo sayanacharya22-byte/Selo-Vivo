@@ -1,0 +1,99 @@
+name: Selo Vivo CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  compile-test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.20.0"
+          cache: npm
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Audit production JavaScript dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.23"
+          enable-cache: true
+
+      - name: Install Python dependencies
+        run: uv sync --directory backend --frozen
+
+      - name: Install Compact 0.31.1
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+          echo "$HOME/.compact/bin" >> "$GITHUB_PATH"
+          "$HOME/.compact/bin/compact" update 0.31.1
+
+      - name: Compile Compact and check committed artifacts
+        shell: bash
+        run: |
+          export PATH="$HOME/.compact/bin:$PATH"
+          bash scripts/compile-compact.sh
+          git diff --exit-code -- contract/managed frontend/generated frontend/public
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /SeloVivo/
+          VITE_ALLOW_BROWSER_DEPLOY: "true"
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  backend-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build production API image
+        run: docker build --file backend/Dockerfile --tag selo-vivo-api:ci backend
+
+  deploy-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: compile-test-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy live demo to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
