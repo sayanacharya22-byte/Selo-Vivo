@@ -105,7 +105,7 @@ Compiled JavaScript bindings, ZKIR, prover keys, and verifier keys are committed
 ## Tests and CI
 
 ```bash
-npm test       # 19 tests + Compact privacy validator
+npm test       # 22 tests + Compact privacy validator
 npm run lint   # ESLint + Ruff
 npm run build  # TypeScript + Vite production bundle
 ```

@@ -1,6 +1,43 @@
 {
-  "projectId": "3f620c05-b6c6-4b60-9dcb-4f6abd45d0a2",
-  "draftId": "fdb48004-8584-4fd6-8912-64d8f6cf40ab",
-  "projectUrl": "https://superdesign.dev/teams/03513578-b489-47f4-94a9-6b52bd539f60/projects/3f620c05-b6c6-4b60-9dcb-4f6abd45d0a2?node=draft-variant-fdb48004-8584-4fd6-8912-64d8f6cf40ab",
-  "updatedAt": "2026-09-24T00:00:00Z"
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "5ae84353-826f-487a-a027-44182792d6f6",
+      "baselineDraftId": "bb042aaf-cae2-40e8-a632-aa689400414b",
+      "activeDraftId": "bb042aaf-cae2-40e8-a632-aa689400414b",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "frontend/src/App.tsx",
+        "frontend/src/components/AppShell.tsx",
+        "frontend/src/components/BrandMark.tsx",
+        "frontend/src/pages/ProofStudio.tsx",
+        "frontend/src/styles.css"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "f9a66a7c7ccf158a2b2fc56d97d266e2a66a0752e404e6a663090a78fcfcd5c0",
+        "frontend/src/App.tsx": "69a8ff816eeb3056068dde7f04e341f63ae9234ffaa578d93adf7ab61dc139f5",
+        "frontend/src/components/AppShell.tsx": "a7cbf9f7ce78e9f2803da6677148fe31abf8f7446971615c24a51dd7b4c88af6",
+        "frontend/src/components/BrandMark.tsx": "a0635fe2fd6c885f9470e6c83ae8e4cd3edf5edd52924827af9c1af6dc1042da",
+        "frontend/src/pages/ProofStudio.tsx": "277d827079691aee58ab120147c9e210d601c07a71c40f8c3c7f3efe8aabe47b",
+        "frontend/src/styles.css": "ba0a2c564d31cf4dec5f9c758985651ecfdbb4e86c118bb2d8115261375a9e82"
+      },
+      "components": [
+        {
+          "name": "AppShell",
+          "id": "8d126d41-3e5c-4962-b27f-ff2cd74f17e1",
+          "sourcePath": "frontend/src/components/AppShell.tsx"
+        }
+      ],
+      "drafts": {
+        "bb042aaf-cae2-40e8-a632-aa689400414b": {
+          "title": "Proof Studio — Public Verification Receipt",
+          "visualDirection": "Brazilian modernist post-proof state with a privacy-safe downloadable JSON receipt",
+          "currentVersion": 2
+        }
+      },
+      "updatedAt": "2026-09-27T22:05:32.5712703+05:30"
+    }
+  }
 }

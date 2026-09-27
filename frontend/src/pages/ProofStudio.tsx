@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   CircleDashed,
   CloudOff,
+  Download,
   EyeOff,
   FileText,
   Globe2,
@@ -24,6 +25,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { useWallet } from "../hooks/useWallet";
 import { composeProof, fetchDashboard, recordProof, type ComposeResponse, type Dashboard } from "../lib/api";
+import { createPublicProofReceipt, downloadPublicProofReceipt, type PublicProofReceipt } from "../lib/publicReceipt";
 import { createDemoCredential, rotateDemoCredential, type LocalCredential } from "../lib/vault";
 import { shortAddress, type MidnightNetwork } from "../lib/wallet";
 import type { ProofReceipt } from "../lib/midnight";
@@ -62,6 +64,7 @@ export function ProofStudio() {
     (requirement.trim().length >= 8 ? 20 : 0) + (composition ? 20 : 0),
   );
   const canProve = Boolean(credential && wallet.session && requirement.trim().length >= 8);
+  const publicReceipt = useMemo(() => receipt ? createPublicProofReceipt(receipt) : null, [receipt]);
 
   useEffect(() => {
     fetchDashboard()
@@ -239,7 +242,7 @@ export function ProofStudio() {
       </motion.section>
 
       <AnimatePresence>{reviewOpen && <DisclosureReview onClose={() => setReviewOpen(false)} composition={composition} />}</AnimatePresence>
-      <AnimateProofResult state={proofState} message={proofMessage} receipt={receipt} />
+      <AnimateProofResult state={proofState} message={proofMessage} receipt={publicReceipt} />
 
       <motion.section className="privacy-boundary" id="privacy-boundary" variants={rise}>
         <div><span className="boundary-icon boundary-icon--local"><Laptop size={20} /></span><div><small>Fica neste dispositivo</small><strong>Identidade, localização exata, documento, validade exata e segredo.</strong></div></div>
@@ -281,13 +284,46 @@ function DisclosureReview({ onClose, composition }: { onClose: () => void; compo
   );
 }
 
-function AnimateProofResult({ state, message, receipt }: { state: "idle" | "proving" | "success" | "error"; message: string | null; receipt: ProofReceipt | null }) {
+function AnimateProofResult({ state, message, receipt }: { state: "idle" | "proving" | "success" | "error"; message: string | null; receipt: PublicProofReceipt | null }) {
   if (state === "idle" || !message) return null;
   return (
     <motion.section className={`proof-result proof-result--${state}`} role={state === "error" ? "alert" : "status"} aria-live="polite" initial={{ opacity: 0, height: 0, y: -8 }} animate={{ opacity: 1, height: "auto", y: 0 }}>
-      <span>{state === "success" ? <CheckCircle2 size={19} /> : state === "proving" ? <CircleDashed size={19} className="spin" /> : <EyeOff size={19} />}</span>
-      <div><strong>{state === "success" ? "Prova confirmada" : state === "proving" ? "Prova em andamento" : "Ação necessária"}</strong><small>{message}</small>{receipt && <code>{receipt.network} · contrato {shortAddress(receipt.contractAddress)} · tx {shortAddress(receipt.proofTxId)}</code>}</div>
+      <div className="proof-result__summary">
+        <span>{state === "success" ? <CheckCircle2 size={19} /> : state === "proving" ? <CircleDashed size={19} className="spin" /> : <EyeOff size={19} />}</span>
+        <div><strong>{state === "success" ? "Prova confirmada" : state === "proving" ? "Prova em andamento" : "Ação necessária"}</strong><small>{message}</small>{receipt && <code>{receipt.network} · contrato {shortAddress(receipt.contract_address)} · tx {shortAddress(receipt.proof_transaction_id)}</code>}</div>
+      </div>
+      {receipt && <PublicReceiptCard receipt={receipt} />}
     </motion.section>
+  );
+}
+
+function PublicReceiptCard({ receipt }: { receipt: PublicProofReceipt }) {
+  const verifiedAt = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(receipt.verified_at));
+
+  return (
+    <motion.div className="public-receipt" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+      <div className="public-receipt__header">
+        <div>
+          <span>Recibo público verificável</span>
+          <h2>Confirmação pronta para compartilhar.</h2>
+        </div>
+        <span className="privacy-badge"><LockKeyhole size={13} /> 0 dados privados</span>
+      </div>
+      <dl className="public-receipt__grid">
+        <div><dt>Rede</dt><dd>{receipt.network}</dd></div>
+        <div><dt>Emitido em</dt><dd>{verifiedAt}</dd></div>
+        <div><dt>Contrato</dt><dd title={receipt.contract_address}>{shortAddress(receipt.contract_address)}</dd></div>
+        <div><dt>Transação da prova</dt><dd title={receipt.proof_transaction_id}>{shortAddress(receipt.proof_transaction_id)}</dd></div>
+        <div className="public-receipt__tag"><dt>Tag do requisito</dt><dd title={receipt.requirement_tag}>{receipt.requirement_tag}</dd></div>
+      </dl>
+      <div className="public-receipt__footer">
+        <p><ShieldCheck size={16} /> Não contém carteira, credencial, documento, segredo ou valores de witness.</p>
+        <button type="button" onClick={() => downloadPublicProofReceipt(receipt)}><Download size={17} /> Baixar JSON</button>
+      </div>
+    </motion.div>
   );
 }
 

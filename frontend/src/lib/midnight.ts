@@ -45,6 +45,8 @@ export type ProofReceipt = {
   deploymentTxId: string;
   proofTxId: string;
   proofTxHash: string;
+  requirementTag: string;
+  verifiedAt: string;
   network: MidnightNetwork;
   walletAddress: string;
 };
@@ -110,6 +112,10 @@ function toPrivateState(credential: LocalCredential): SeloVivoPrivateState {
 
 async function sha256Bytes(value: string): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+}
+
+function bytesToHex(value: Uint8Array): string {
+  return Array.from(value, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 async function deploy(
@@ -230,6 +236,8 @@ export async function proveCredential(input: {
     deploymentTxId: current.deployTxData.public.txId,
     proofTxId: proof.public.txId,
     proofTxHash: proof.public.txHash,
+    requirementTag: bytesToHex(requestTag),
+    verifiedAt: new Date().toISOString(),
     network: input.network,
     walletAddress: input.walletAddress,
   };
