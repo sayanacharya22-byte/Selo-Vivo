@@ -1,0 +1,10 @@
+.git
+.github
+.env
+.superdesign
+node_modules
+frontend/dist
+backend/.venv
+**/__pycache__
+**/.pytest_cache
+docs/screenshots
