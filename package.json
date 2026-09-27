@@ -1,0 +1,28 @@
+{
+  "name": "selo-vivo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,api -c green,blue \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm --workspace frontend run dev",
+    "dev:api": "uv run --directory backend uvicorn app.main:app --reload --port 8000",
+    "build": "npm --workspace frontend run build",
+    "lint": "npm --workspace frontend run lint && uv run --directory backend ruff check .",
+    "test": "npm run test:web && npm run test:api && npm run check:compact",
+    "test:web": "npm --workspace frontend run test",
+    "test:api": "uv run --directory backend python -m pytest",
+    "check:compact": "node scripts/validate-compact-source.mjs",
+    "contracts:compile": "powershell -ExecutionPolicy Bypass -File scripts/compile-compact.ps1",
+    "db:migrate": "uv run --directory backend alembic upgrade head"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
