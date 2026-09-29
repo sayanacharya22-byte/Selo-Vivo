@@ -4,6 +4,10 @@
 
 **Hosting:** Netlify for the React application and Render for the FastAPI service. See the [deployment runbook](docs/DEPLOYMENT.md).
 
+## Live website URL
+
+[https://vocal-trifle-7ec441.netlify.app](https://vocal-trifle-7ec441.netlify.app)
+
 **A confidential sustainability passport for Brazilian producer cooperatives, powered by Midnight.**
 
 Selo Vivo lets a cooperative prove that a trusted credential is valid, current, and relevant to a buyer's policy without publishing the cooperative identity, exact farm or workshop, audit documents, precise biome evidence, or production data. It is a new **Confidential Credentials** product—not an allowlist or identity-gating clone of VeilPass.
@@ -17,6 +21,14 @@ The interface uses a contemporary Brazilian visual language: warm paper, forest 
 ![Preprod proof in progress](docs/screenshots/proof-studio-preprod-in-progress.png)
 
 ![Finalized Preprod proof with public receipt](docs/screenshots/proof-studio-preprod-verified-receipt.png)
+
+## Mobile responsive UI
+
+![Mobile proof studio overview](docs/screenshots/mobile-proof-studio-overview.jpg)
+
+![Mobile navigation drawer](docs/screenshots/mobile-navigation-drawer.jpg)
+
+![Mobile proof capsule](docs/screenshots/mobile-proof-capsule.jpg)
 
 ## Why this product matters
 
