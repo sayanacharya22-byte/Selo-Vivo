@@ -10,7 +10,13 @@ Selo Vivo lets a cooperative prove that a trusted credential is valid, current, 
 
 The interface uses a contemporary Brazilian visual language: warm paper, forest and leaf greens, clay, azulejo blue, sun yellow, modernist curves, and restrained tile rhythm. [Open the approved design study](https://superdesign.dev/teams/03513578-b489-47f4-94a9-6b52bd539f60/projects/3f620c05-b6c6-4b60-9dcb-4f6abd45d0a2?node=draft-variant-fdb48004-8584-4fd6-8912-64d8f6cf40ab).
 
+## Website screenshots
+
 ![Selo Vivo production proof studio](docs/screenshots/proof-studio-production.png)
+
+![Preprod proof in progress](docs/screenshots/proof-studio-preprod-in-progress.png)
+
+![Finalized Preprod proof with public receipt](docs/screenshots/proof-studio-preprod-verified-receipt.png)
 
 ## Why this product matters
 
@@ -90,6 +96,11 @@ The provisioned Neon project is `selo-vivo` in São Paulo (`aws-sa-east-1`), wit
 6. The connected wallet deploys its own constructor-bound contract on the selected network, invokes `prove_credential`, and displays both the contract address and finalized transaction ID. The deployment is reused only for that wallet and network during the current page session.
 
 Changing network or disconnecting clears the in-memory wallet session. Demo credential material is never placed in localStorage or sessionStorage and disappears with the page session. Contract maintenance keys stay in ephemeral memory and cannot be exported by the app.
+
+## Preprod
+
+- Contract address: [`87c5a926a5a909183466414da4ef546918af51327ebae6f1ceb32c51f405c9c2`](https://explorer.1am.xyz/contract/87c5a926a5a909183466414da4ef546918af51327ebae6f1ceb32c51f405c9c2?network=preprod)
+- Deployment transaction hash: [`2d8e8e41517decd500125f6fcbe33b6833e13bc1f68822f02b2300bad498db07`](https://explorer.1am.xyz/tx/2d8e8e41517decd500125f6fcbe33b6833e13bc1f68822f02b2300bad498db07?network=preprod)
 
 ## Contract
 
