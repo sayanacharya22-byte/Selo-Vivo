@@ -8,6 +8,10 @@
 
 [https://vocal-trifle-7ec441.netlify.app](https://vocal-trifle-7ec441.netlify.app)
 
+## Demo Video URL
+
+[Watch the Selo Vivo demo](https://drive.google.com/file/d/14IE9i_PK-474MqT298KJGOvBMo895PFl/view?usp=sharing)
+
 **A confidential sustainability passport for Brazilian producer cooperatives, powered by Midnight.**
 
 Selo Vivo lets a cooperative prove that a trusted credential is valid, current, and relevant to a buyer's policy without publishing the cooperative identity, exact farm or workshop, audit documents, precise biome evidence, or production data. It is a new **Confidential Credentials** product—not an allowlist or identity-gating clone of VeilPass.
@@ -136,6 +140,12 @@ npm run build  # TypeScript + Vite production bundle
 The workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) installs Node 22, Python dependencies, and Compact 0.31.1; audits production packages; recompiles the contract; checks generated artifacts; runs lint and all tests; builds the frontend; and builds the non-root API container. Netlify builds from `main`; Render is configured to deploy only after the GitHub checks pass. A second workflow runs CodeQL for TypeScript and Python, and Dependabot tracks npm, uv, and Actions updates.
 
 ![Passing test suite and Compact validation](docs/screenshots/tests-passing.png)
+
+## Working CI/CD Pipeline
+
+![GitHub Actions workflow runs](docs/screenshots/github-actions-workflows.png)
+
+The screenshot shows CodeQL passing and the `readme updated` Selo Vivo CI run failing; it documents the active workflows, not an all-green run.
 
 ## Deployment
 
